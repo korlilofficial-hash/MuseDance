@@ -1,463 +1,144 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MuseDance · Вход и регистрация</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MuseDance · Music Player</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+:root {
+    --purple: #a855f7; --blue: #3b82f6; --bg: #0b0b12;
+    --card: rgba(18,18,28,0.85); --border: rgba(255,255,255,0.06);
+    --text-muted: #9ca3af;
+}
+body {
+    min-height: 100vh; background: radial-gradient(circle at 20% 30%, #1e1e2f, #0b0b12);
+    color: #fff; padding-bottom: 100px; overflow-x: hidden;
+}
+body::before {
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(circle at 70% 80%, rgba(168,85,247,0.15), transparent 50%),
+                radial-gradient(circle at 20% 20%, rgba(6,182,212,0.15), transparent 55%);
+    pointer-events: none; z-index: 0;
+}
+/* AUTH */
+.auth-screen {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem; z-index: 10;
+    background: radial-gradient(circle at 20% 30%, #1e1e2f, #0b0b12);
+}
+.auth-screen.hide { display: none; }
+.auth-card {
+    width: 100%; max-width: 440px; background: var(--card); backdrop-filter: blur(18px);
+    border-radius: 2.5rem; padding: 2.5rem 2rem;
+    box-shadow: 0 30px 50px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 40px rgba(168,85,247,0.2);
+}
+.logo { text-align: center; margin-bottom: 2rem; }
+.logo-icon { font-size: 3rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 16px rgba(168,85,247,0.8)); }
+.logo-text { font-size: 1.9rem; font-weight: 700; background: linear-gradient(to right, #e2e8f0, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.logo-sub { font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.4em; text-transform: uppercase; margin-top: 0.3rem; }
+.btn-google {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    background: #fff; color: #1f1f1f; border: none; border-radius: 3rem;
+    padding: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 1.25rem;
+}
+.btn-google:hover:not(:disabled) { transform: translateY(-2px); background: #f7f7f7; }
+.btn-google:disabled { opacity: 0.7; cursor: wait; }
+.divider { display: flex; align-items: center; gap: 0.9rem; margin: 1.4rem 0; color: #6b7280; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+.tabs { display: flex; gap: 0.5rem; background: rgba(0,0,0,0.4); padding: 0.35rem; border-radius: 3rem; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+.tab-btn { flex: 1; background: transparent; border: none; padding: 0.85rem 0.5rem; border-radius: 2rem; font-weight: 600; color: #9aa2b1; cursor: pointer; transition: all 0.25s; font-size: 0.95rem; }
+.tab-btn.active { background: linear-gradient(135deg, var(--purple), var(--blue)); color: #fff; box-shadow: 0 8px 18px -6px var(--purple); }
+.form { display: flex; flex-direction: column; gap: 1.15rem; }
+.input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.input-group label { font-size: 0.8rem; color: var(--text-muted); padding-left: 0.75rem; }
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-icon { position: absolute; left: 1rem; opacity: 0.5; color: #a78bfa; }
+.input-group input { width: 100%; background: rgba(0,0,0,0.4); border: 1.5px solid var(--border); border-radius: 2rem; padding: 0.9rem 1rem 0.9rem 2.8rem; font-size: 0.95rem; color: #f0f4ff; outline: none; transition: all 0.2s; }
+.input-group input:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(168,85,247,0.15); }
+.btn-primary { background: linear-gradient(135deg, var(--purple), var(--blue)); border: none; border-radius: 3rem; padding: 1rem; font-weight: 700; color: #fff; cursor: pointer; transition: all 0.25s; box-shadow: 0 12px 24px -8px var(--purple); }
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
+.btn-primary:disabled { opacity: 0.6; cursor: wait; }
+.error-msg, .success-msg { padding: 0.75rem 1rem; border-radius: 1rem; font-size: 0.85rem; display: none; margin-bottom: 1rem; }
+.error-msg { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+.success-msg { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: #86efac; }
+.error-msg.show, .success-msg.show { display: block; }
+.extra { text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1.25rem; }
+.extra a { color: #c084fc; cursor: pointer; text-decoration: none; }
+#registerForm { display: none; }
 
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 20% 30%, #1e1e2f, #0b0b12);
-            padding: 1.5rem;
-            color: #fff;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.2), transparent 50%),
-                        radial-gradient(circle at 20% 20%, rgba(6, 182, 212, 0.2), transparent 55%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .card {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 440px;
-            background: rgba(18, 18, 28, 0.85);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border-radius: 2.5rem;
-            padding: 2.5rem 2rem;
-            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.8),
-                        0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-                        0 0 40px rgba(168, 85, 247, 0.2);
-        }
-
-        .logo {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .logo-icon {
-            font-size: 3rem;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-            filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.8));
-        }
-
-        .logo-text {
-            font-size: 1.9rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #e2e8f0, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .logo-sub {
-            font-size: 0.8rem;
-            color: #9ca3af;
-            letter-spacing: 0.4em;
-            text-transform: uppercase;
-            margin-top: 0.3rem;
-        }
-
-        /* Google-кнопка */
-        .btn-google {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            background: #ffffff;
-            color: #1f1f1f;
-            border: none;
-            border-radius: 3rem;
-            padding: 1rem;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-            margin-bottom: 1.25rem;
-        }
-
-        .btn-google:hover:not(:disabled) {
-            transform: translateY(-2px);
-            background: #f7f7f7;
-            box-shadow: 0 10px 24px rgba(255, 255, 255, 0.15);
-        }
-
-        .btn-google:disabled {
-            opacity: 0.7;
-            cursor: wait;
-        }
-
-        .btn-google svg {
-            flex-shrink: 0;
-        }
-
-        /* Разделитель «или» */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 0.9rem;
-            margin: 1.4rem 0 1.4rem;
-            color: #6b7280;
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            font-weight: 500;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.12), transparent);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 0.35rem;
-            border-radius: 3rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 0.85rem 0.5rem;
-            border-radius: 2rem;
-            font-weight: 600;
-            font-size: 1rem;
-            color: #9aa2b1;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, #a855f7, #3b82f6);
-            color: white;
-            box-shadow: 0 8px 18px -6px #a855f7;
-        }
-
-        .tab-btn:hover:not(.active) {
-            color: #d1d5db;
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.15rem;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .input-group label {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #9ca3af;
-            padding-left: 0.75rem;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 1rem;
-            font-size: 1.1rem;
-            opacity: 0.5;
-            color: #a78bfa;
-            pointer-events: none;
-        }
-
-        .input-group input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1.5px solid rgba(255, 255, 255, 0.07);
-            border-radius: 2rem;
-            padding: 0.9rem 1rem 0.9rem 2.8rem;
-            font-size: 0.95rem;
-            color: #f0f4ff;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .input-group input::placeholder {
-            color: #6b7280;
-        }
-
-        .input-group input:focus {
-            border-color: #a855f7;
-            background: rgba(20, 15, 35, 0.8);
-            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
-        }
-
-        .btn-primary {
-            margin-top: 0.4rem;
-            background: linear-gradient(135deg, #a855f7, #3b82f6);
-            border: none;
-            border-radius: 3rem;
-            padding: 1rem;
-            font-weight: 700;
-            font-size: 1rem;
-            color: white;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 12px 24px -8px #a855f7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 18px 28px -8px #a855f7;
-            filter: brightness(1.1);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: wait;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
-            border-radius: 3rem;
-            padding: 0.9rem;
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: #d1d5db;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .error-msg, .success-msg {
-            padding: 0.75rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.85rem;
-            display: none;
-            margin-bottom: 1rem;
-        }
-
-        .error-msg {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            color: #fca5a5;
-            animation: shake 0.3s ease;
-        }
-
-        .success-msg {
-            background: rgba(34, 197, 94, 0.15);
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            color: #86efac;
-        }
-
-        .error-msg.show, .success-msg.show {
-            display: block;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
-        }
-
-        .extra {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.8rem;
-            color: #9ca3af;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 1.25rem;
-        }
-
-        .extra a {
-            color: #c084fc;
-            text-decoration: none;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .extra a:hover {
-            color: #e0aaff;
-            text-decoration: underline;
-        }
-
-        #registerForm {
-            display: none;
-        }
-
-        /* Экран плеера */
-        #playerScreen {
-            display: none;
-            text-align: center;
-        }
-
-        .user-avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #a855f7, #3b82f6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0 auto 1rem;
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
-            overflow: hidden;
-        }
-
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .greeting {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-
-        .user-email {
-            color: #9ca3af;
-            font-size: 0.85rem;
-            margin-bottom: 2rem;
-        }
-
-        .provider-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.35rem 0.85rem;
-            border-radius: 2rem;
-            font-size: 0.75rem;
-            color: #cbd5e1;
-            margin-bottom: 1.25rem;
-        }
-
-        .player-box {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .player-track {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-
-        .player-artist {
-            color: #9ca3af;
-            font-size: 0.85rem;
-            margin-bottom: 1.2rem;
-        }
-
-        .player-progress {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .player-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #a855f7, #3b82f6);
-            border-radius: 2px;
-            animation: progress 8s linear infinite;
-        }
-
-        @keyframes progress {
-            from { width: 0%; }
-            to { width: 100%; }
-        }
-
-        .player-controls {
-            display: flex;
-            justify-content: center;
-            gap: 1.2rem;
-            font-size: 1.5rem;
-        }
-
-        .player-controls span {
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .player-controls span:hover {
-            opacity: 1;
-        }
-
-        @media (max-width: 450px) {
-            .card {
-                padding: 2rem 1.25rem;
-                border-radius: 2rem;
-            }
-            .logo-text { font-size: 1.6rem; }
-            .tab-btn { font-size: 0.9rem; padding: 0.7rem 0.2rem; }
-        }
-    </style>
+/* APP */
+.app { display: none; position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+.app.show { display: block; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem 0; }
+.brand { display: flex; align-items: center; gap: 0.6rem; font-size: 1.3rem; font-weight: 700; background: linear-gradient(135deg, #c084fc, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.user-chip { display: flex; align-items: center; gap: 0.6rem; background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 0.4rem 0.9rem 0.4rem 0.4rem; border-radius: 3rem; cursor: pointer; transition: all 0.2s; }
+.user-chip:hover { background: rgba(168,85,247,0.15); }
+.user-chip-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--blue)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; overflow: hidden; }
+.user-chip-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-chip-name { font-size: 0.85rem; font-weight: 500; }
+.search-box { position: relative; margin-bottom: 1.5rem; }
+.search-box input { width: 100%; background: rgba(0,0,0,0.4); border: 1.5px solid var(--border); border-radius: 3rem; padding: 1rem 1rem 1rem 3.2rem; font-size: 0.95rem; color: #fff; outline: none; transition: all 0.2s; }
+.search-box input:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(168,85,247,0.15); }
+.search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: #a78bfa; opacity: 0.7; }
+.section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.genres { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+.genre-card { background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(59,130,246,0.2)); border: 1px solid var(--border); border-radius: 1.2rem; padding: 1.2rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+.genre-card:hover { transform: translateY(-3px); border-color: var(--purple); box-shadow: 0 10px 20px -8px var(--purple); }
+.genre-emoji { font-size: 1.8rem; margin-bottom: 0.4rem; }
+.genre-name { font-size: 0.8rem; font-weight: 600; }
+.tracks { display: flex; flex-direction: column; gap: 0.5rem; }
+.track { display: flex; align-items: center; gap: 0.9rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 1rem; padding: 0.7rem; cursor: pointer; transition: all 0.2s; }
+.track:hover { background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.4); }
+.track.playing { background: rgba(168,85,247,0.2); border-color: var(--purple); }
+.track-cover { width: 52px; height: 52px; border-radius: 0.7rem; overflow: hidden; background: linear-gradient(135deg, var(--purple), var(--blue)); flex-shrink: 0; }
+.track-cover img { width: 100%; height: 100%; object-fit: cover; }
+.track-info { flex: 1; min-width: 0; }
+.track-name { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-artist { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-like { background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 0.5rem; color: #6b7280; transition: all 0.2s; }
+.track-like:hover { transform: scale(1.15); }
+.track-like.liked { color: #ef4444; }
+.loading, .empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem; }
+.tab-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.row-tab { background: transparent; border: none; color: var(--text-muted); padding: 0.75rem 1rem; font-weight: 600; cursor: pointer; font-size: 0.9rem; position: relative; }
+.row-tab.active { color: #fff; }
+.row-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--purple), var(--blue)); border-radius: 2px; }
+.player { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,15,25,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(168,85,247,0.3); padding: 0.9rem 1rem; z-index: 100; }
+.player.show { display: block; }
+.player-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; }
+.player-cover { width: 48px; height: 48px; border-radius: 0.6rem; overflow: hidden; background: linear-gradient(135deg, var(--purple), var(--blue)); flex-shrink: 0; }
+.player-cover img { width: 100%; height: 100%; object-fit: cover; }
+.player-meta { flex: 1; min-width: 0; }
+.player-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-artist { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-controls { display: flex; align-items: center; gap: 0.5rem; }
+.ctrl-btn { background: transparent; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; padding: 0.4rem; opacity: 0.8; transition: all 0.2s; }
+.ctrl-btn:hover { opacity: 1; transform: scale(1.1); }
+.ctrl-btn.play-btn { background: linear-gradient(135deg, var(--purple), var(--blue)); width: 42px; height: 42px; border-radius: 50%; font-size: 1rem; opacity: 1; box-shadow: 0 6px 14px -4px var(--purple); }
+.progress-wrap { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.05); cursor: pointer; }
+.progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--purple), var(--blue)); transition: width 0.1s linear; }
+.time-info { font-size: 0.7rem; color: var(--text-muted); margin-left: auto; }
+@media (max-width: 600px) {
+    .topbar { flex-direction: column; align-items: stretch; }
+    .player-inner { gap: 0.6rem; }
+    .player-name { font-size: 0.8rem; }
+    .time-info { display: none; }
+}
+</style>
 </head>
 <body>
 
-    <!-- ЭКРАН АВТОРИЗАЦИИ -->
-    <div class="card" id="authScreen">
+<!-- AUTH -->
+<div class="auth-screen" id="authScreen">
+    <div class="auth-card">
         <div class="logo">
             <div class="logo-icon">🎵</div>
             <div class="logo-text">MuseDance</div>
             <div class="logo-sub">music player</div>
         </div>
-
-        <!-- 🔵 GOOGLE КНОПКА -->
         <button type="button" class="btn-google" id="googleBtn">
-            <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <svg width="20" height="20" viewBox="0 0 48 48">
                 <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
                 <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
                 <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.2 35 26.7 36 24 36c-5.2 0-9.6-3.1-11.3-7.7l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
@@ -465,336 +146,537 @@
             </svg>
             <span>Продолжить с Google</span>
         </button>
-
         <div class="divider">или по email</div>
-
         <div class="tabs">
             <button class="tab-btn active" id="loginTab">Вход</button>
             <button class="tab-btn" id="registerTab">Регистрация</button>
         </div>
-
         <div class="error-msg" id="errorMsg"></div>
         <div class="success-msg" id="successMsg"></div>
-
-        <!-- Форма входа -->
         <form class="form" id="loginForm">
             <div class="input-group">
                 <label>Email</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">📧</span>
-                    <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email" required>
-                </div>
+                <div class="input-wrapper"><span class="input-icon">📧</span><input type="email" id="loginEmail" placeholder="your@email.com" required></div>
             </div>
             <div class="input-group">
                 <label>Пароль</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">🔒</span>
-                    <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" required>
-                </div>
+                <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="loginPassword" placeholder="••••••••" required></div>
             </div>
-            <button type="submit" class="btn-primary" id="loginBtn">
-                <span>Войти</span>
-                <span style="font-size: 1.1rem;">→</span>
-            </button>
+            <button type="submit" class="btn-primary" id="loginBtn">Войти</button>
         </form>
-
-        <!-- Форма регистрации -->
         <form class="form" id="registerForm">
             <div class="input-group">
-                <label>Имя пользователя</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">👤</span>
-                    <input type="text" id="registerName" placeholder="muse_lover" autocomplete="username" required>
-                </div>
+                <label>Имя</label>
+                <div class="input-wrapper"><span class="input-icon">👤</span><input type="text" id="registerName" placeholder="muse_lover" required></div>
             </div>
             <div class="input-group">
                 <label>Email</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">📧</span>
-                    <input type="email" id="registerEmail" placeholder="your@email.com" autocomplete="email" required>
-                </div>
+                <div class="input-wrapper"><span class="input-icon">📧</span><input type="email" id="registerEmail" placeholder="your@email.com" required></div>
             </div>
             <div class="input-group">
-                <label>Пароль (минимум 6 символов)</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">🔒</span>
-                    <input type="password" id="registerPassword" placeholder="••••••••" autocomplete="new-password" required minlength="6">
-                </div>
+                <label>Пароль (мин. 6)</label>
+                <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="registerPassword" placeholder="••••••••" required minlength="6"></div>
             </div>
-            <button type="submit" class="btn-primary" id="registerBtn">
-                <span>Создать аккаунт</span>
-                <span style="font-size: 1.1rem;">✨</span>
-            </button>
+            <button type="submit" class="btn-primary" id="registerBtn">Создать аккаунт</button>
         </form>
+        <div class="extra"><a id="forgotPassword">Забыли пароль?</a></div>
+    </div>
+</div>
 
-        <div class="extra">
-            <a id="forgotPassword">Забыли пароль?</a>
+<!-- APP -->
+<div class="app" id="app">
+    <div class="topbar">
+        <div class="brand">🎵 MuseDance</div>
+        <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <div class="user-chip">
+                <div class="user-chip-avatar" id="userAvatarMini">?</div>
+                <div class="user-chip-name" id="userNameMini">user</div>
+            </div>
+            <button class="ctrl-btn" id="logoutBtn" title="Выйти">🚪</button>
         </div>
     </div>
-
-    <!-- ЭКРАН ПЛЕЕРА -->
-    <div class="card" id="playerScreen">
-        <div class="user-avatar" id="userAvatar">?</div>
-        <div class="greeting" id="userGreeting">Привет!</div>
-        <div class="user-email" id="userEmail">email</div>
-        <div class="provider-badge" id="providerBadge">
-            <span id="providerIcon">📧</span>
-            <span id="providerText">Email/Password</span>
-        </div>
-
-        <div class="player-box">
-            <div class="player-track">🎵 Midnight Vibes</div>
-            <div class="player-artist">MuseDance Radio</div>
-            <div class="player-progress">
-                <div class="player-progress-bar"></div>
-            </div>
-            <div class="player-controls">
-                <span>⏮️</span>
-                <span>⏸️</span>
-                <span>⏭️</span>
-            </div>
-        </div>
-
-        <button class="btn-secondary" id="logoutBtn" style="width: 100%;">
-            Выйти
-        </button>
+    <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Поиск треков, артистов...">
     </div>
+    <div class="tab-row">
+        <button class="row-tab active" id="tabDiscover">🔥 Обзор</button>
+        <button class="row-tab" id="tabLikes">❤️ Мои лайки</button>
+    </div>
+    <div id="discoverSection">
+        <div class="section-title">🎵 Жанры</div>
+        <div class="genres" id="genres">
+            <div class="genre-card" data-tag="chill"><div class="genre-emoji">🌙</div><div class="genre-name">Chill</div></div>
+            <div class="genre-card" data-tag="rock"><div class="genre-emoji">🎸</div><div class="genre-name">Rock</div></div>
+            <div class="genre-card" data-tag="electronic"><div class="genre-emoji">🎹</div><div class="genre-name">Electronic</div></div>
+            <div class="genre-card" data-tag="hiphop"><div class="genre-emoji">🎤</div><div class="genre-name">Hip-Hop</div></div>
+            <div class="genre-card" data-tag="jazz"><div class="genre-emoji">🎷</div><div class="genre-name">Jazz</div></div>
+            <div class="genre-card" data-tag="pop"><div class="genre-emoji">✨</div><div class="genre-name">Pop</div></div>
+        </div>
+        <div class="section-title" id="tracksTitle">🎧 Популярное</div>
+        <div class="tracks" id="tracks"><div class="loading">Загрузка...</div></div>
+    </div>
+    <div id="likesSection" style="display:none;">
+        <div class="section-title">❤️ Ваши лайки</div>
+        <div class="tracks" id="likedTracks"><div class="loading">Загрузка...</div></div>
+    </div>
+</div>
 
-    <!-- 🔥 Firebase SDK v10 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import {
-            getAuth,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signInWithPopup,
-            GoogleAuthProvider,
-            signOut,
-            onAuthStateChanged,
-            updateProfile,
-            sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+<!-- PLAYER -->
+<div class="player" id="player">
+    <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+    <div class="player-inner">
+        <div class="player-cover" id="playerCover"></div>
+        <div class="player-meta">
+            <div class="player-name" id="playerName">—</div>
+            <div class="player-artist" id="playerArtist">—</div>
+        </div>
+        <div class="player-controls">
+            <button class="ctrl-btn" id="prevBtn">⏮️</button>
+            <button class="ctrl-btn play-btn" id="playBtn">⏸️</button>
+            <button class="ctrl-btn" id="nextBtn">⏭️</button>
+        </div>
+        <div class="time-info" id="timeInfo">0:00 / 0:00</div>
+    </div>
+</div>
 
-        // ----- Твой конфиг -----
-        const firebaseConfig = {
-            apiKey: "AIzaSyCUAzpzwQDlnYatI4-4fIjVm76qBzCPFuk",
-            authDomain: "musedance-3da1d.firebaseapp.com",
-            projectId: "musedance-3da1d",
-            storageBucket: "musedance-3da1d.firebasestorage.app",
-            messagingSenderId: "203743228849",
-            appId: "1:203743228849:web:f1c52da18f2294085f8390",
-            measurementId: "G-8RDF6JH4SY"
-        };
+<!-- 🔥 Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged,
+    updateProfile, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+    getFirestore, doc, setDoc, deleteDoc, getDocs, collection, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const googleProvider = new GoogleAuthProvider();
+const firebaseConfig = {
+    apiKey: "AIzaSyCUAzpzwQDlnYatI4-4fIjVm76qBzCPFuk",
+    authDomain: "musedance-3da1d.firebaseapp.com",
+    projectId: "musedance-3da1d",
+    storageBucket: "musedance-3da1d.firebasestorage.app",
+    messagingSenderId: "203743228849",
+    appId: "1:203743228849:web:f1c52da18f2294085f8390",
+    measurementId: "G-8RDF6JH4SY"
+};
 
-        // Хотим всегда показывать выбор аккаунта (не авто-вход)
-        googleProvider.setCustomParameters({ prompt: 'select_account' });
+const SC_CLIENT_ID = "Pb72ranhoyt6gw7hM7TkzUlTXlMWSNSo";
 
-        // ----- DOM -----
-        const authScreen = document.getElementById('authScreen');
-        const playerScreen = document.getElementById('playerScreen');
-        const loginTab = document.getElementById('loginTab');
-        const registerTab = document.getElementById('registerTab');
-        const loginForm = document.getElementById('loginForm');
-        const registerForm = document.getElementById('registerForm');
-        const errorMsg = document.getElementById('errorMsg');
-        const successMsg = document.getElementById('successMsg');
-        const loginBtn = document.getElementById('loginBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const googleBtn = document.getElementById('googleBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const forgotPassword = document.getElementById('forgotPassword');
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-        // ----- Утилиты -----
-        function showError(text) {
-            errorMsg.textContent = '⚠️ ' + text;
-            errorMsg.classList.add('show');
-            successMsg.classList.remove('show');
-            setTimeout(() => errorMsg.classList.remove('show'), 6000);
+// DOM
+const authScreen = document.getElementById('authScreen');
+const appScreen = document.getElementById('app');
+const player = document.getElementById('player');
+const loginTab = document.getElementById('loginTab');
+const registerTab = document.getElementById('registerTab');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const errorMsg = document.getElementById('errorMsg');
+const successMsg = document.getElementById('successMsg');
+const loginBtn = document.getElementById('loginBtn');
+const registerBtn = document.getElementById('registerBtn');
+const googleBtn = document.getElementById('googleBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const forgotPassword = document.getElementById('forgotPassword');
+const searchInput = document.getElementById('searchInput');
+const genresEl = document.getElementById('genres');
+const tracksEl = document.getElementById('tracks');
+const tracksTitle = document.getElementById('tracksTitle');
+const tabDiscover = document.getElementById('tabDiscover');
+const tabLikes = document.getElementById('tabLikes');
+const discoverSection = document.getElementById('discoverSection');
+const likesSection = document.getElementById('likesSection');
+const likedTracksEl = document.getElementById('likedTracks');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
+const playerCover = document.getElementById('playerCover');
+const playerName = document.getElementById('playerName');
+const playerArtist = document.getElementById('playerArtist');
+const timeInfo = document.getElementById('timeInfo');
+
+// State
+let currentUser = null;
+let currentTracks = [];
+let currentIndex = -1;
+let likedIds = new Set();
+let likedData = {};
+let scWidget = null;
+let scIframe = null;
+let isPlaying = false;
+let currentDuration = 0;
+let progressTimer = null;
+
+// ========== AUTH ==========
+function showError(t){ errorMsg.textContent='⚠️ '+t; errorMsg.classList.add('show'); setTimeout(()=>errorMsg.classList.remove('show'),6000); }
+function showSuccess(t){ successMsg.textContent='✅ '+t; successMsg.classList.add('show'); setTimeout(()=>successMsg.classList.remove('show'),6000); }
+function setLoading(btn, on, txt='Загрузка'){ if(on){btn.disabled=true;btn.dataset.orig=btn.innerHTML;btn.innerHTML=`<span>${txt}...</span>`;}else{btn.disabled=false;if(btn.dataset.orig)btn.innerHTML=btn.dataset.orig;} }
+
+function translateError(code){
+    const m = {
+        'auth/email-already-in-use':'Этот email уже зарегистрирован.',
+        'auth/invalid-email':'Некорректный email.',
+        'auth/weak-password':'Пароль слишком слабый.',
+        'auth/user-not-found':'Пользователь не найден.',
+        'auth/wrong-password':'Неверный пароль.',
+        'auth/invalid-credential':'Неверный email или пароль.',
+        'auth/too-many-requests':'Слишком много попыток. Позже.',
+        'auth/network-request-failed':'Ошибка сети.',
+        'auth/popup-blocked':'Браузер заблокировал попап.',
+        'auth/popup-closed-by-user':'Окно закрыто.',
+        'auth/unauthorized-domain':'Домен не авторизован в Firebase.',
+        'auth/account-exists-with-different-credential':'Email уже используется другим способом.'
+    };
+    return m[code] || code;
+}
+
+function showLogin(){ loginTab.classList.add('active'); registerTab.classList.remove('active'); loginForm.style.display='flex'; registerForm.style.display='none'; }
+function showRegister(){ registerTab.classList.add('active'); loginTab.classList.remove('active'); loginForm.style.display='none'; registerForm.style.display='flex'; }
+loginTab.addEventListener('click', showLogin);
+registerTab.addEventListener('click', showRegister);
+
+googleBtn.addEventListener('click', async () => {
+    setLoading(googleBtn, true, 'Открытие Google');
+    try { await signInWithPopup(auth, googleProvider); }
+    catch(e){ if(e.code!=='auth/popup-closed-by-user') showError(translateError(e.code)); }
+    finally { setLoading(googleBtn, false); }
+});
+
+registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('registerName').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const pass = document.getElementById('registerPassword').value;
+    setLoading(registerBtn, true, 'Создание');
+    try {
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(cred.user, { displayName: name });
+    } catch(e){ showError(translateError(e.code)); }
+    finally { setLoading(registerBtn, false); }
+});
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    setLoading(loginBtn, true, 'Вход');
+    try { await signInWithEmailAndPassword(auth, email, pass); }
+    catch(e){ showError(translateError(e.code)); }
+    finally { setLoading(loginBtn, false); }
+});
+
+forgotPassword.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = prompt('Email для сброса пароля:');
+    if(!email) return;
+    try { await sendPasswordResetEmail(auth, email.trim()); showSuccess('Письмо отправлено'); }
+    catch(e){ showError(translateError(e.code)); }
+});
+
+logoutBtn.addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, (user) => {
+    if(user){
+        currentUser = user;
+        authScreen.classList.add('hide');
+        appScreen.classList.add('show');
+        const name = user.displayName || user.email.split('@')[0];
+        document.getElementById('userNameMini').textContent = name;
+        const av = document.getElementById('userAvatarMini');
+        if(user.photoURL) av.innerHTML = `<img src="${user.photoURL}">`;
+        else av.textContent = name[0].toUpperCase();
+        loadLikes();
+        loadPopular();
+    } else {
+        currentUser = null;
+        authScreen.classList.remove('hide');
+        appScreen.classList.remove('show');
+        player.classList.remove('show');
+        loginForm.reset(); registerForm.reset();
+        stopProgress();
+    }
+});
+
+// ========== SOUNDCLOUD ==========
+async function scFetch(url){
+    const sep = url.includes('?') ? '&' : '?';
+    const res = await fetch(`${url}${sep}client_id=${SC_CLIENT_ID}`);
+    if(!res.ok) throw new Error('SC error ' + res.status);
+    return res.json();
+}
+
+async function scSearch(query){
+    const data = await scFetch(`https://api-v2.soundcloud.com/search/tracks?q=${encodeURIComponent(query)}&limit=30&linked_partitioning=1`);
+    return (data.collection || []).filter(t => t.streamable !== false);
+}
+
+async function scPopular(tag){
+    try {
+        const data = await scFetch(`https://api-v2.soundcloud.com/search/tracks?q=${encodeURIComponent(tag)}&limit=25&linked_partitioning=1`);
+        return (data.collection || []).filter(t => t.streamable !== false);
+    } catch(e){ return []; }
+}
+
+// ========== UI ==========
+function coverUrl(track){
+    return track.artwork_url ? track.artwork_url.replace('-large','-t500x500') :
+           (track.user && track.user.avatar_url ? track.user.avatar_url.replace('-large','-t500x500') : '');
+}
+
+function fmtTime(ms){
+    if(!ms) return '0:00';
+    const s = Math.floor(ms/1000);
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function renderTracks(tracks, container){
+    if(!tracks.length){ container.innerHTML = '<div class="empty">Ничего не найдено 😕</div>'; return; }
+    container.innerHTML = '';
+    tracks.forEach((track, idx) => {
+        const isLiked = likedIds.has(String(track.id));
+        const div = document.createElement('div');
+        div.className = 'track';
+        div.innerHTML = `
+            <div class="track-cover">${coverUrl(track) ? `<img src="${coverUrl(track)}" loading="lazy">` : '🎵'}</div>
+            <div class="track-info">
+                <div class="track-name">${escapeHtml(track.title || 'Без названия')}</div>
+                <div class="track-artist">${escapeHtml(track.user?.username || 'Unknown')} · ${fmtTime(track.duration)}</div>
+            </div>
+            <button class="track-like ${isLiked?'liked':''}" data-id="${track.id}">${isLiked?'❤️':'🤍'}</button>
+        `;
+        div.addEventListener('click', (ev) => {
+            if(ev.target.classList.contains('track-like')) return;
+            playTrack(tracks, idx);
+        });
+        div.querySelector('.track-like').addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            toggleLike(track, ev.target);
+        });
+        container.appendChild(div);
+    });
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function loadPopular(){
+    tracksEl.innerHTML = '<div class="loading">Загрузка...</div>';
+    tracksTitle.textContent = '🎧 Популярное';
+    try {
+        const t = await scPopular('trending');
+        currentTracks = t;
+        renderTracks(t, tracksEl);
+    } catch(e){
+        tracksEl.innerHTML = '<div class="empty">Не удалось загрузить. Проверь интернет.</div>';
+    }
+}
+
+async function loadGenre(tag){
+    tracksEl.innerHTML = '<div class="loading">Загрузка...</div>';
+    tracksTitle.textContent = `🎵 ${tag.charAt(0).toUpperCase()+tag.slice(1)}`;
+    try {
+        const t = await scPopular(tag);
+        currentTracks = t;
+        renderTracks(t, tracksEl);
+    } catch(e){
+        tracksEl.innerHTML = '<div class="empty">Ошибка загрузки</div>';
+    }
+}
+
+genresEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.genre-card');
+    if(card) loadGenre(card.dataset.tag);
+});
+
+// Search (debounced)
+let searchTimeout = null;
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    const q = searchInput.value.trim();
+    if(!q){ loadPopular(); return; }
+    searchTimeout = setTimeout(async () => {
+        tracksEl.innerHTML = '<div class="loading">Поиск...</div>';
+        tracksTitle.textContent = `🔍 "${q}"`;
+        try {
+            const t = await scSearch(q);
+            currentTracks = t;
+            renderTracks(t, tracksEl);
+        } catch(e){
+            tracksEl.innerHTML = '<div class="empty">Ошибка поиска</div>';
         }
+    }, 500);
+});
 
-        function showSuccess(text) {
-            successMsg.textContent = '✅ ' + text;
-            successMsg.classList.add('show');
-            errorMsg.classList.remove('show');
-            setTimeout(() => successMsg.classList.remove('show'), 6000);
+// Tabs
+tabDiscover.addEventListener('click', () => {
+    tabDiscover.classList.add('active'); tabLikes.classList.remove('active');
+    discoverSection.style.display = 'block'; likesSection.style.display = 'none';
+});
+tabLikes.addEventListener('click', () => {
+    tabLikes.classList.add('active'); tabDiscover.classList.remove('active');
+    discoverSection.style.display = 'none'; likesSection.style.display = 'block';
+    renderLikedTracks();
+});
+
+// ========== PLAYER ==========
+function createWidget(){
+    if(scIframe) scIframe.remove();
+    scIframe = document.createElement('iframe');
+    scIframe.id = 'sc-widget';
+    scIframe.allow = 'autoplay';
+    scIframe.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;';
+    scIframe.src = 'https://w.soundcloud.com/player/?url=&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false';
+    document.body.appendChild(scIframe);
+
+    scIframe.onload = () => {
+        scWidget = SC.Widget(scIframe);
+        scWidget.bind(SC.Widget.Events.READY, () => {
+            scWidget.bind(SC.Widget.Events.PLAY, () => { isPlaying = true; playBtn.textContent = '⏸️'; startProgress(); });
+            scWidget.bind(SC.Widget.Events.PAUSE, () => { isPlaying = false; playBtn.textContent = '▶️'; });
+            scWidget.bind(SC.Widget.Events.FINISH, () => { nextTrack(); });
+        });
+    };
+}
+
+function loadSCApi(cb){
+    if(window.SC) return cb();
+    const s = document.createElement('script');
+    s.src = 'https://w.soundcloud.com/player/api.js';
+    s.onload = cb;
+    document.head.appendChild(s);
+}
+
+loadSCApi(() => {});
+
+function playTrack(tracks, idx){
+    currentTracks = tracks;
+    currentIndex = idx;
+    const track = tracks[idx];
+    if(!track) return;
+
+    playerCover.innerHTML = coverUrl(track) ? `<img src="${coverUrl(track)}">` : '🎵';
+    playerName.textContent = track.title || '—';
+    playerArtist.textContent = track.user?.username || '—';
+    player.classList.add('show');
+
+    // highlight
+    document.querySelectorAll('.track').forEach(el => el.classList.remove('playing'));
+
+    if(!scWidget) createWidget();
+    const waitReady = () => {
+        if(scWidget) {
+            scWidget.load(`https://api.soundcloud.com/tracks/${track.id}`, { auto_play: true });
+        } else {
+            setTimeout(waitReady, 300);
         }
+    };
+    waitReady();
+}
 
-        function setLoading(btn, isLoading, textLoading = 'Загрузка') {
-            if (isLoading) {
-                btn.disabled = true;
-                btn.dataset.origText = btn.innerHTML;
-                btn.innerHTML = `<span>${textLoading}...</span>`;
-            } else {
-                btn.disabled = false;
-                if (btn.dataset.origText) btn.innerHTML = btn.dataset.origText;
-            }
-        }
+function startProgress(){
+    stopProgress();
+    progressTimer = setInterval(() => {
+        if(!scWidget) return;
+        scWidget.getCurrentSound((s) => {
+            if(!s) return;
+            currentDuration = s.duration || 0;
+            scWidget.getPosition((pos) => {
+                if(currentDuration > 0){
+                    const pct = Math.min(100, (pos/currentDuration)*100);
+                    progressBar.style.width = pct + '%';
+                    timeInfo.textContent = `${fmtTime(pos)} / ${fmtTime(currentDuration)}`;
+                }
+            });
+        });
+    }, 500);
+}
+function stopProgress(){ if(progressTimer){ clearInterval(progressTimer); progressTimer = null; } }
 
-        // ----- Перевод ошибок Firebase -----
-        function translateError(code) {
-            const map = {
-                'auth/email-already-in-use': 'Этот email уже зарегистрирован. Попробуйте войти или используйте Google.',
-                'auth/invalid-email': 'Некорректный email.',
-                'auth/weak-password': 'Пароль слишком слабый (минимум 6 символов).',
-                'auth/user-not-found': 'Пользователь с таким email не найден.',
-                'auth/wrong-password': 'Неверный пароль.',
-                'auth/invalid-credential': 'Неверный email или пароль.',
-                'auth/too-many-requests': 'Слишком много попыток. Попробуйте позже.',
-                'auth/network-request-failed': 'Ошибка сети. Проверьте интернет.',
-                'auth/popup-closed-by-user': 'Окно входа закрыто.',
-                'auth/popup-blocked': 'Браузер заблокировал всплывающее окно. Разрешите попапы для этого сайта.',
-                'auth/cancelled-popup-request': 'Запрос отменён.',
-                'auth/unauthorized-domain': 'Домен не авторизован в Firebase Console.',
-                'auth/operation-not-allowed': 'Этот способ входа отключён в Firebase Console.',
-                'auth/account-exists-with-different-credential': 'Этот email уже зарегистрирован другим способом (например, паролем). Войдите паролем или свяжите аккаунты.',
-                'auth/missing-password': 'Введите пароль.'
+function nextTrack(){
+    if(currentIndex < currentTracks.length - 1) playTrack(currentTracks, currentIndex + 1);
+    else playTrack(currentTracks, 0);
+}
+function prevTrack(){
+    if(currentIndex > 0) playTrack(currentTracks, currentIndex - 1);
+    else playTrack(currentTracks, currentTracks.length - 1);
+}
+
+playBtn.addEventListener('click', () => {
+    if(!scWidget) return;
+    if(isPlaying) scWidget.pause(); else scWidget.play();
+});
+nextBtn.addEventListener('click', nextTrack);
+prevBtn.addEventListener('click', prevTrack);
+
+progressWrap.addEventListener('click', (e) => {
+    if(!scWidget || !currentDuration) return;
+    const rect = progressWrap.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    scWidget.seekTo(Math.floor(pct * currentDuration));
+});
+
+// ========== LIKES ==========
+function likesRef(){
+    return collection(db, 'users', currentUser.uid, 'likes');
+}
+
+async function loadLikes(){
+    if(!currentUser) return;
+    try {
+        const snap = await getDocs(likesRef());
+        likedIds.clear(); likedData = {};
+        snap.forEach(d => {
+            likedIds.add(d.id);
+            likedData[d.id] = d.data();
+        });
+        if(tracksEl.children.length && !tracksEl.querySelector('.loading')) renderTracks(currentTracks, tracksEl);
+        if(likesSection.style.display === 'block') renderLikedTracks();
+    } catch(e){ console.warn('Likes load err', e); }
+}
+
+async function toggleLike(track, btnEl){
+    if(!currentUser) return;
+    const id = String(track.id);
+    try {
+        if(likedIds.has(id)){
+            await deleteDoc(doc(db, 'users', currentUser.uid, 'likes', id));
+            likedIds.delete(id); delete likedData[id];
+            btnEl.textContent = '🤍'; btnEl.classList.remove('liked');
+        } else {
+            const data = {
+                id: track.id, title: track.title || '', artist: track.user?.username || '',
+                duration: track.duration || 0,
+                artwork: coverUrl(track),
+                permalink: track.permalink_url || '',
+                likedAt: Date.now()
             };
-            return map[code] || 'Ошибка: ' + code;
+            await setDoc(doc(db, 'users', currentUser.uid, 'likes', id), data);
+            likedIds.add(id); likedData[id] = data;
+            btnEl.textContent = '❤️'; btnEl.classList.add('liked');
         }
+        if(likesSection.style.display === 'block') renderLikedTracks();
+    } catch(e){
+        console.error('Like error', e);
+        alert('Не удалось сохранить лайк. Проверь Firestore Rules.');
+    }
+}
 
-        // ----- Переключение вкладок -----
-        function showLogin() {
-            loginTab.classList.add('active');
-            registerTab.classList.remove('active');
-            loginForm.style.display = 'flex';
-            registerForm.style.display = 'none';
-            errorMsg.classList.remove('show');
-            successMsg.classList.remove('show');
-        }
-
-        function showRegister() {
-            registerTab.classList.add('active');
-            loginTab.classList.remove('active');
-            loginForm.style.display = 'none';
-            registerForm.style.display = 'flex';
-            errorMsg.classList.remove('show');
-            successMsg.classList.remove('show');
-        }
-
-        loginTab.addEventListener('click', showLogin);
-        registerTab.addEventListener('click', showRegister);
-
-        // ----- 🔵 GOOGLE SIGN-IN -----
-        googleBtn.addEventListener('click', async () => {
-            setLoading(googleBtn, true, 'Открытие Google');
-            try {
-                const result = await signInWithPopup(auth, googleProvider);
-                const user = result.user;
-                // Если это первый вход — Firebase сам создаёт аккаунт
-                showSuccess(`Добро пожаловать, ${user.displayName || user.email}! 🎉`);
-                // onAuthStateChanged переключит экран
-            } catch (err) {
-                console.error('Google sign-in error:', err);
-                if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-                    showError(translateError(err.code));
-                }
-            } finally {
-                setLoading(googleBtn, false);
-            }
-        });
-
-        // ----- РЕГИСТРАЦИЯ -----
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('registerName').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value;
-
-            if (!name || !email || !password) {
-                showError('Заполните все поля');
-                return;
-            }
-
-            setLoading(registerBtn, true, 'Создание');
-            try {
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                await updateProfile(cred.user, { displayName: name });
-                showSuccess('Аккаунт создан! Добро пожаловать 🎉');
-            } catch (err) {
-                console.error(err);
-                showError(translateError(err.code));
-            } finally {
-                setLoading(registerBtn, false);
-            }
-        });
-
-        // ----- ВХОД -----
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!email || !password) {
-                showError('Заполните все поля');
-                return;
-            }
-
-            setLoading(loginBtn, true, 'Вход');
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (err) {
-                console.error(err);
-                showError(translateError(err.code));
-            } finally {
-                setLoading(loginBtn, false);
-            }
-        });
-
-        // ----- СБРОС ПАРОЛЯ -----
-        forgotPassword.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const email = prompt('Введите email для сброса пароля:');
-            if (!email) return;
-            try {
-                await sendPasswordResetEmail(auth, email.trim());
-                showSuccess('Письмо для сброса пароля отправлено на ' + email);
-            } catch (err) {
-                console.error(err);
-                showError(translateError(err.code));
-            }
-        });
-
-        // ----- ВЫХОД -----
-        logoutBtn.addEventListener('click', async () => {
-            await signOut(auth);
-        });
-
-        // ----- ОТСЛЕЖИВАНИЕ СОСТОЯНИЯ -----
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                authScreen.style.display = 'none';
-                playerScreen.style.display = 'block';
-
-                const name = user.displayName || user.email.split('@')[0];
-
-                // Аватар: если Google дал photoURL — показываем картинку
-                const avatarEl = document.getElementById('userAvatar');
-                if (user.photoURL) {
-                    avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
-                } else {
-                    avatarEl.textContent = name[0].toUpperCase();
-                }
-
-                document.getElementById('userGreeting').textContent = 'Привет, ' + name + '! 👋';
-                document.getElementById('userEmail').textContent = user.email;
-
-                // Показываем каким способом вошёл
-                const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
-                document.getElementById('providerIcon').textContent = isGoogle ? '🔵' : '📧';
-                document.getElementById('providerText').textContent = isGoogle
-                    ? 'Вход через Google'
-                    : 'Email и пароль';
-            } else {
-                authScreen.style.display = 'block';
-                playerScreen.style.display = 'none';
-                loginForm.reset();
-                registerForm.reset();
-            }
-        });
-    </script>
+function renderLikedTracks(){
+    const list = Object.values(likedData).sort((a,b)=>b.likedAt-a.likedAt);
+    if(!list.length){ likedTracksEl.innerHTML = '<div class="empty">Пока нет лайков 💔<br><br>Тапни 🤍 на треке, чтобы сохранить</div>'; return; }
+    const tracks = list.map(t => ({ id: t.id, title: t.title, user:{ username: t.artist }, artwork_url: t.artwork, duration: t.duration, permalink_url: t.permalink }));
+    renderTracks(tracks, likedTracksEl);
+}
+</script>
 </body>
 </html>
